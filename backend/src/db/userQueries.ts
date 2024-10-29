@@ -2,14 +2,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { eq } from "drizzle-orm";
 import { usersTable } from "./schema";
 import { db } from "./db";
-import bcrypt from "bcrypt";
-
-async function main() {
-  console.log("New user created");
-
-  const users = await db.select().from(usersTable);
-  console.log("Getting all users", users);
-}
+import bcrypt, { hash } from "bcrypt";
 
 export async function addUser(name: string, email: string, password: string) {
   const hashedpassword = await bcrypt.hash(password, 10);
@@ -27,9 +20,13 @@ export async function getUsers() {
   return await db.select().from(usersTable);
 }
 
-export async function findUsers(name: string, password: string) {
-  return await db
-    .select()
+//not working
+export async function findUserByMail(email: string) {
+  const data = await db
+    .selectDistinct()
     .from(usersTable)
-    .where(eq(usersTable.fullName, name));
+    .where(eq(usersTable.email, email));
+  const user = data[0];
+
+  return user;
 }
